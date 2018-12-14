@@ -5,7 +5,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.view.Surface;
 
 /**
  * Created by Maciej Szalek on 2018-10-09.
@@ -15,27 +14,19 @@ public class SensorsManager implements SensorEventListener {
 
 
     public interface SensorListener{
-        void onNewParameters(double x, double y, double z);
+        void onNewParameters(float x, float y, float z);
     }
 
     private Sensor mAccelerometer;
     private SensorManager mSensorManager;
     private SensorListener listener;
 
-    private double x, y, z;
-    private int rotation;
-    static final float ALPHA = 0.99f;
+    private float x, y, z;
+    private static final float ALPHA = 0.99f;
 
     public SensorsManager(Context context){
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-    }
-
-    public int getRotation(){
-        return rotation;
-    }
-    public void setRotation(int rotation){
-        this.rotation = rotation;
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
     }
 
     public void startListener(){
@@ -63,35 +54,26 @@ public class SensorsManager implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        final float alpha = (float) 0.9;
-        final float gravity[] = new float[3];
+        float[] rotationMatrix = new float[16];
+        //rotationMatrix = lowPassFilter(event.values.clone(), rotationMatrix);
+        SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
 
-        gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
-        gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
-        gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
+        float[] remappedRotationMatrix = new float[16];
+        //remappedRotationMatrix = lowPassFilter(event.values.clone(), remappedRotationMatrix);
+        SensorManager.remapCoordinateSystem(rotationMatrix,
+                SensorManager.AXIS_X,
+                SensorManager.AXIS_Z,
+                remappedRotationMatrix);
 
-        switch (getRotation()) {
-            case Surface.ROTATION_0:
-                x = event.values[0] - gravity[0];
-                y = event.values[1] - gravity[1];
-                z = event.values[2] - gravity[2];
-                break;
-            case Surface.ROTATION_90:
-                x = -(event.values[1] - gravity[1]);
-                y = event.values[0] - gravity[0];
-                z = event.values[2] - gravity[2];
-                break;
-            case Surface.ROTATION_180:
-                x = -(event.values[0] - gravity[0]);
-                y = -(event.values[1] - gravity[1]);
-                z = event.values[2] - gravity[2];
-                break;
-            case Surface.ROTATION_270:
-                x = event.values[1] - gravity[1];
-                y = -(event.values[0] - gravity[0]);
-                z = event.values[2] - gravity[2];
-
+        float[] orientation = new float[3];
+        SensorManager.getOrientation(remappedRotationMatrix, orientation);
+        for(int i = 0; i<3; i++ ){
+            orientation[i] = (float) (Math.toDegrees(orientation[i]));
         }
+        x = orientation[0];
+        y = orientation[1];
+        z = orientation[2];
+
         if(listener !=null){
             listener.onNewParameters(x, y, z);
         }

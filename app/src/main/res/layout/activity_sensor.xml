@@ -7,6 +7,12 @@
     tools:context="com.sc.sensorcube.SensorActivity"
     android:background="@color/background">
 
+    <android.opengl.GLSurfaceView
+        android:id="@+id/gl_surface_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+
     <TextView
         android:id="@+id/sensor_text"
         android:layout_width="wrap_content"
