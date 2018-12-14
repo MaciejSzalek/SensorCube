@@ -5,6 +5,7 @@ import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -17,18 +18,12 @@ public class SensorActivity extends AppCompatActivity {
     private SensorsManager sensor;
     private GLSurfaceView mGlSurfaceView;
 
-    private int rotation;
-    private float xRot;
-    private float yRot;
-    private float zRot;
-    private float xSpeed;
-    private float ySpeed;
-    private float zSpeed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sensor);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         startListenerButton = findViewById(R.id.sensor_start_button);
         stopListenerButton = findViewById(R.id.sensor_stop_button);
@@ -64,7 +59,6 @@ public class SensorActivity extends AppCompatActivity {
         SensorsManager.SensorListener sensorListener = new SensorsManager.SensorListener() {
             @Override
             public void onNewParameters(float x, float y, float z) {
-                rotation = getWindowManager().getDefaultDisplay().getRotation();
                 sensorTextView.setText("\n X: " + x
                         + "\n Y: " + y
                         + "\n Z: " + z);

@@ -55,11 +55,11 @@ public class SensorsManager implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         float[] rotationMatrix = new float[16];
-        //rotationMatrix = lowPassFilter(event.values.clone(), rotationMatrix);
+        rotationMatrix = lowPassFilter(event.values.clone(), rotationMatrix);
         SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
 
         float[] remappedRotationMatrix = new float[16];
-        //remappedRotationMatrix = lowPassFilter(event.values.clone(), remappedRotationMatrix);
+        remappedRotationMatrix = lowPassFilter(event.values.clone(), remappedRotationMatrix);
         SensorManager.remapCoordinateSystem(rotationMatrix,
                 SensorManager.AXIS_X,
                 SensorManager.AXIS_Z,
